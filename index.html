@@ -1,68 +1,1323 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>System Access Terminal</title>
-    <style>
-      body {
-        background-color: black;
-        color: limegreen;
-        font-family: monospace;
-        font-size: 1.2rem;
-        padding: 20px;
-        overflow: hidden;
-      }
-      #terminal {
-        white-space: pre-line;
-      }
-      .red-alert {
-        color: red;
-        font-size: 3rem;
-        text-align: center;
-        margin-top: 100px;
-        display: none;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="terminal"></div>
-    <div class="red-alert" id="alert">YOU'VE BEEN HACKED</div>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta name="robots" content="noindex" />
+        <title>System Access Terminal</title>
+        <style>
+            :root {
+                --bg: #000;
+                --green: #35ff6d;
+                --dim: #158c34;
+                --faint: #0b4d1d;
+                --white: #d9ffe4;
+                --amber: #ffb000;
+                --red: #ff2b2b;
+                --accent: var(--green);
+            }
 
-    <script>
-      const terminal = document.getElementById("terminal");
-      const alertBox = document.getElementById("alert");
+            * {
+                box-sizing: border-box;
+            }
 
-      const lines = [
-        "Connecting to remote host...",
-        "Bypassing firewall...",
-        "Accessing system files...",
-        "Injecting malware payload...",
-        "Deleting core directory /C...",
-        "ERROR: Connection with 197.23.64.10 established",
-        "Exporting private keys...",
-        "Remote access granted...",
-        "Monitoring keyboard input...",
-        "Tracking IP address...",
-        "Injecting rootkit...",
-        "Erasing local backups...",
-      ];
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                background: var(--bg);
+                overflow: hidden;
+            }
 
-      let index = 0;
+            body {
+                font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+                color: var(--green);
+                font-size: clamp(11px, 1.55vw, 15px);
+                line-height: 1.45;
+                -webkit-font-smoothing: antialiased;
+                cursor: default;
+                user-select: none;
+            }
 
-      function typeLine() {
-        if (index < lines.length) {
-          terminal.innerHTML += lines[index] + "\n";
-          index++;
-          setTimeout(typeLine, 700);
-        } else {
-          // Show big red alert
-          document.body.style.backgroundColor = "black";
-          terminal.style.display = "none";
-          alertBox.style.display = "block";
-        }
-      }
+            /* ---------- background: matrix rain ---------- */
+            #rain {
+                position: fixed;
+                inset: 0;
+                z-index: 0;
+                opacity: 0.28;
+                pointer-events: none;
+            }
 
-      typeLine();
-    </script>
-  </body>
+            /* ---------- CRT overlay ---------- */
+            #crt {
+                position: fixed;
+                inset: 0;
+                z-index: 90;
+                pointer-events: none;
+                background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 2px, rgba(0, 0, 0, 0.32) 3px, rgba(0, 0, 0, 0.32) 4px);
+                mix-blend-mode: multiply;
+            }
+
+            #vignette {
+                position: fixed;
+                inset: 0;
+                z-index: 91;
+                pointer-events: none;
+                background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.55) 100%);
+            }
+
+            #flicker {
+                position: fixed;
+                inset: 0;
+                z-index: 92;
+                pointer-events: none;
+                background: var(--accent);
+                opacity: 0;
+                animation: flick 7s steps(1) infinite;
+            }
+
+            @keyframes flick {
+                0%,
+                96%,
+                100% {
+                    opacity: 0;
+                }
+
+                97% {
+                    opacity: 0.02;
+                }
+
+                98.5% {
+                    opacity: 0.035;
+                }
+            }
+
+            /* ---------- gate ---------- */
+            #gate {
+                position: fixed;
+                inset: 0;
+                z-index: 60;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 1.4rem;
+                text-align: center;
+                padding: 6vw;
+                background: rgba(0, 0, 0, 0.86);
+                cursor: pointer;
+            }
+
+            #gate h1 {
+                margin: 0;
+                font-size: clamp(1.1rem, 3.4vw, 2rem);
+                letter-spacing: 0.28em;
+                font-weight: 600;
+                color: var(--white);
+                text-shadow: 0 0 14px var(--green);
+            }
+
+            #gate .sub {
+                color: var(--dim);
+                max-width: 46ch;
+                letter-spacing: 0.06em;
+            }
+
+            #gate .btn {
+                border: 1px solid var(--green);
+                padding: 0.85em 2.2em;
+                letter-spacing: 0.3em;
+                color: var(--green);
+                text-shadow: 0 0 10px var(--green);
+                box-shadow:
+                    0 0 22px rgba(53, 255, 109, 0.18) inset,
+                    0 0 22px rgba(53, 255, 109, 0.12);
+                animation: pulse 2.2s ease-in-out infinite;
+            }
+
+            @keyframes pulse {
+                0%,
+                100% {
+                    opacity: 0.55;
+                }
+
+                50% {
+                    opacity: 1;
+                }
+            }
+
+            #gate .fine {
+                position: absolute;
+                bottom: 4vh;
+                color: #0a3d17;
+                font-size: 0.78em;
+                letter-spacing: 0.18em;
+            }
+
+            /* ---------- terminal ---------- */
+            #screen {
+                position: fixed;
+                inset: 0;
+                z-index: 20;
+                overflow-y: auto;
+                overflow-x: hidden;
+                padding: max(14px, 2.4vh) max(12px, 2.2vw) 40vh;
+                scrollbar-width: none;
+            }
+
+            #screen::-webkit-scrollbar {
+                display: none;
+            }
+
+            #terminal {
+                white-space: pre-wrap;
+                word-break: break-word;
+            }
+
+            .line {
+                text-shadow: 0 0 7px currentColor;
+                min-height: 1.45em;
+            }
+
+            .prompt {
+                color: var(--dim);
+            }
+
+            .cmd {
+                color: var(--white);
+            }
+
+            .ok {
+                color: var(--green);
+            }
+
+            .dimline {
+                color: var(--dim);
+            }
+
+            .faintline {
+                color: var(--faint);
+            }
+
+            .warn {
+                color: var(--amber);
+            }
+
+            .bad {
+                color: var(--red);
+                font-weight: 700;
+            }
+
+            .hex {
+                color: var(--faint);
+                letter-spacing: 0.03em;
+            }
+
+            .field-k {
+                color: var(--dim);
+            }
+
+            .field-v {
+                color: var(--white);
+                font-weight: 700;
+            }
+
+            .rule {
+                color: var(--faint);
+            }
+
+            .spacer {
+                min-height: 0.7em;
+            }
+
+            .cursor::after {
+                content: "\2588";
+                margin-left: 1px;
+                animation: blink 1s steps(1) infinite;
+            }
+
+            @keyframes blink {
+                0%,
+                49% {
+                    opacity: 1;
+                }
+
+                50%,
+                100% {
+                    opacity: 0;
+                }
+            }
+
+            /* ---------- keylogger strip ---------- */
+            #keystrip {
+                position: fixed;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 70;
+                display: none;
+                padding: 0.55em max(12px, 2.2vw);
+                background: rgba(0, 0, 0, 0.92);
+                border-top: 1px solid var(--faint);
+                color: var(--amber);
+                font-size: 0.9em;
+                letter-spacing: 0.08em;
+                white-space: nowrap;
+                overflow: hidden;
+                text-shadow: 0 0 8px currentColor;
+            }
+
+            #keystrip b {
+                color: var(--red);
+                font-weight: 700;
+            }
+
+            #keybuf {
+                color: var(--white);
+            }
+
+            /* ---------- meltdown ---------- */
+            #alert {
+                position: fixed;
+                inset: 0;
+                z-index: 80;
+                display: none;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 1.2rem;
+                text-align: center;
+                padding: 5vw;
+                background: rgba(0, 0, 0, 0.9);
+            }
+
+            #alert .skull {
+                font-size: clamp(3rem, 12vw, 8rem);
+                line-height: 1;
+            }
+
+            #alert h2 {
+                margin: 0;
+                color: var(--red);
+                font-size: clamp(1.6rem, 7.5vw, 5rem);
+                letter-spacing: 0.1em;
+                font-weight: 800;
+                text-shadow: 0 0 24px var(--red);
+            }
+
+            #alert .msg {
+                color: #ff8a8a;
+                letter-spacing: 0.14em;
+                font-size: clamp(0.8rem, 2.4vw, 1.15rem);
+                max-width: 48ch;
+            }
+
+            body.meltdown {
+                --accent: var(--red);
+            }
+
+            body.meltdown #screen {
+                color: var(--red);
+            }
+
+            body.meltdown #rain {
+                opacity: 0.4;
+            }
+
+            body.strobe #alert {
+                animation: strobe 1.6s steps(1) infinite;
+            }
+
+            @keyframes strobe {
+                0%,
+                49% {
+                    background: rgba(0, 0, 0, 0.9);
+                }
+
+                50%,
+                100% {
+                    background: rgba(60, 0, 0, 0.92);
+                }
+            }
+
+            body.shake #screen,
+            body.shake #alert {
+                animation: shake 0.32s linear infinite;
+            }
+
+            @keyframes shake {
+                0% {
+                    transform: translate(0, 0);
+                }
+
+                25% {
+                    transform: translate(-3px, 2px);
+                }
+
+                50% {
+                    transform: translate(2px, -2px);
+                }
+
+                75% {
+                    transform: translate(-2px, -1px);
+                }
+
+                100% {
+                    transform: translate(0, 0);
+                }
+            }
+
+            body.glitch #screen {
+                text-shadow:
+                    2px 0 rgba(255, 0, 60, 0.85),
+                    -2px 0 rgba(0, 200, 255, 0.85);
+                animation: sliceit 0.16s steps(2) infinite;
+            }
+
+            @keyframes sliceit {
+                0% {
+                    clip-path: inset(0 0 0 0);
+                    transform: translateX(0);
+                }
+
+                50% {
+                    clip-path: inset(18% 0 34% 0);
+                    transform: translateX(6px);
+                }
+
+                100% {
+                    clip-path: inset(0 0 0 0);
+                    transform: translateX(-4px);
+                }
+            }
+
+            /* ---------- dead hold ---------- */
+            #hold {
+                position: fixed;
+                inset: 0;
+                z-index: 85;
+                display: none;
+                align-items: flex-start;
+                justify-content: flex-start;
+                padding: max(14px, 2.4vh) max(12px, 2.2vw);
+                background: #000;
+                color: var(--dim);
+            }
+
+            #holdtext {
+                white-space: pre-wrap;
+            }
+
+            /* ---------- reveal ---------- */
+            #reveal {
+                position: fixed;
+                inset: 0;
+                z-index: 95;
+                display: none;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 1rem;
+                text-align: center;
+                padding: 6vw 5vw;
+                background: #05070a;
+                color: #e8f0ff;
+                font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+                overflow-y: auto;
+                animation: fadein 0.9s ease both;
+            }
+
+            @keyframes fadein {
+                from {
+                    opacity: 0;
+                }
+
+                to {
+                    opacity: 1;
+                }
+            }
+
+            #reveal h2 {
+                margin: 0;
+                font-size: clamp(1.8rem, 8vw, 5rem);
+                letter-spacing: 0.06em;
+                background: linear-gradient(92deg, #ffd166, #ff6bd6 45%, #6bdcff);
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+                font-weight: 800;
+            }
+
+            #reveal .tag {
+                color: #9fb3c8;
+                letter-spacing: 0.16em;
+                font-size: clamp(0.8rem, 2.6vw, 1.05rem);
+            }
+
+            #reveal .card {
+                margin-top: 0.6rem;
+                border: 1px solid #1e2a3a;
+                border-radius: 10px;
+                background: #0a0f16;
+                padding: 1.1rem 1.3rem;
+                text-align: left;
+                max-width: 62ch;
+                color: #8fa6bd;
+                font-size: clamp(0.74rem, 2.1vw, 0.9rem);
+                line-height: 1.75;
+            }
+
+            #reveal .card b {
+                color: #d7e6f5;
+                font-weight: 700;
+            }
+
+            #reveal .card .yes {
+                color: #46e08a;
+            }
+
+            #reveal .card .no {
+                color: #ff7676;
+            }
+
+            #reveal .actions {
+                display: flex;
+                gap: 0.7rem;
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-top: 0.4rem;
+            }
+
+            #reveal button {
+                font: inherit;
+                font-size: clamp(0.78rem, 2.2vw, 0.95rem);
+                letter-spacing: 0.14em;
+                padding: 0.8em 1.8em;
+                border-radius: 8px;
+                border: 1px solid #2b3d55;
+                background: #111a26;
+                color: #cfe2f5;
+                cursor: pointer;
+                transition:
+                    transform 0.12s ease,
+                    background 0.12s ease;
+            }
+
+            #reveal button:hover {
+                background: #172434;
+                transform: translateY(-1px);
+            }
+
+            #reveal .hint {
+                color: #4d6076;
+                font-size: 0.78em;
+                letter-spacing: 0.1em;
+                margin-top: 0.3rem;
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                #flicker,
+                body.strobe #alert,
+                body.shake #screen,
+                body.shake #alert,
+                body.glitch #screen,
+                #gate .btn {
+                    animation: none !important;
+                }
+
+                body.glitch #screen {
+                    text-shadow: 0 0 7px currentColor;
+                    clip-path: none;
+                    transform: none;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <canvas id="rain"></canvas>
+
+        <div id="screen">
+            <div id="terminal"></div>
+        </div>
+
+        <div id="keystrip">
+            <b>&#9679; KEYLOGGER ACTIVE</b> &nbsp;&rsaquo;&rsaquo;&nbsp;
+            <span id="keybuf"></span>
+        </div>
+
+        <div id="alert">
+            <div class="skull">&#9760;</div>
+            <h2 id="alert-title">SYSTEM COMPROMISED</h2>
+            <div class="msg" id="alert-msg">ALL LOCAL FILES HAVE BEEN ENCRYPTED</div>
+        </div>
+
+        <div id="hold">
+            <div id="holdtext"></div>
+        </div>
+
+        <div id="reveal">
+            <h2>JUST KIDDING &#127881;</h2>
+            <div class="tag">you got pranked</div>
+            <div class="card">
+                <div style="margin-bottom: 0.6rem">
+                    <b>Nothing happened. Here is exactly what this page did:</b>
+                </div>
+                <div><span class="yes">&#10003;</span> Printed some scary text on a black background.</div>
+                <div>
+                    <span class="yes">&#10003;</span> Read info your browser hands to <em>every</em> website you visit &mdash; screen size, timezone, language, CPU cores &mdash; and showed it back to
+                    you.
+                </div>
+                <div><span class="no">&#10007;</span> Did <b>not</b> send a single byte anywhere. No network requests. At all.</div>
+                <div><span class="no">&#10007;</span> Did <b>not</b> touch your files, camera, microphone or passwords.</div>
+                <div><span class="no">&#10007;</span> Did <b>not</b> save or transmit your keystrokes &mdash; they were echoed on screen and thrown away.</div>
+                <div style="margin-top: 0.7rem">It is one HTML file. Hit <b>View Source</b> and read the whole thing.</div>
+            </div>
+            <div class="actions">
+                <button id="again">RUN IT AGAIN</button>
+                <button id="src">VIEW THE SOURCE</button>
+            </div>
+            <div class="hint">tip: add <b>?name=Dave</b> to the URL to personalise it &mdash; or <b>?fast</b> to speed it up</div>
+        </div>
+
+        <div id="gate">
+            <h1>SYSTEM ACCESS TERMINAL</h1>
+            <div class="sub">SECURE SHELL v4.11.2 &mdash; UNAUTHORISED ACCESS IS PROHIBITED AND WILL BE LOGGED</div>
+            <div class="btn">&#9655; INITIATE CONNECTION</div>
+            <div class="fine">press esc at any time to abort</div>
+        </div>
+
+        <div id="crt"></div>
+        <div id="vignette"></div>
+        <div id="flicker"></div>
+
+        <script>
+            (function () {
+                "use strict";
+
+                /* ============================================================
+                 * config
+                 * ========================================================== */
+                var params = new URLSearchParams(location.search);
+                var VICTIM = (params.get("name") || "").replace(/[^\w .'-]/g, "").slice(0, 24);
+                var FAST = params.has("fast");
+                var SPEED = FAST ? 0.3 : 1;
+                var REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+                var HOLD_MS = FAST ? 6000 : 20000;
+
+                var term = document.getElementById("terminal");
+                var screenEl = document.getElementById("screen");
+                var gate = document.getElementById("gate");
+                var alertEl = document.getElementById("alert");
+                var alertTitle = document.getElementById("alert-title");
+                var alertMsg = document.getElementById("alert-msg");
+                var holdEl = document.getElementById("hold");
+                var holdText = document.getElementById("holdtext");
+                var revealEl = document.getElementById("reveal");
+                var keystrip = document.getElementById("keystrip");
+                var keybuf = document.getElementById("keybuf");
+
+                /* ============================================================
+                 * abortable timing
+                 * ========================================================== */
+                var aborted = false;
+                var pending = [];
+
+                function Abort() {}
+
+                function sleep(ms) {
+                    if (aborted) return Promise.reject(new Abort());
+                    return new Promise(function (res, rej) {
+                        var entry = { rej: rej };
+                        entry.id = setTimeout(
+                            function () {
+                                pending = pending.filter(function (p) {
+                                    return p !== entry;
+                                });
+                                res();
+                            },
+                            Math.max(0, ms * SPEED),
+                        );
+                        pending.push(entry);
+                    });
+                }
+
+                function abortAll() {
+                    if (aborted) return;
+                    aborted = true;
+                    pending.forEach(function (p) {
+                        clearTimeout(p.id);
+                        p.rej(new Abort());
+                    });
+                    pending = [];
+                }
+
+                function rnd(a, b) {
+                    return a + Math.random() * (b - a);
+                }
+                function pick(a) {
+                    return a[Math.floor(Math.random() * a.length)];
+                }
+                function hex(n) {
+                    var s = "";
+                    for (var i = 0; i < n; i++) s += "0123456789abcdef"[Math.floor(Math.random() * 16)];
+                    return s;
+                }
+
+                /* ============================================================
+                 * terminal primitives
+                 * ========================================================== */
+                function toBottom() {
+                    screenEl.scrollTop = screenEl.scrollHeight;
+                }
+
+                /* how many monospace chars fit across the terminal? everything that
+                   draws fixed-width art (bars, hexdumps, field labels) sizes off this
+                   so nothing ever wraps onto a second line. */
+                var COLS = 80,
+                    LABEL_W = 26,
+                    BAR_W = 26,
+                    NARROW = false;
+
+                function measure() {
+                    var probe = document.createElement("span");
+                    probe.style.cssText = "position:absolute;visibility:hidden;white-space:pre;left:-9999px";
+                    probe.textContent = "0123456789";
+                    term.appendChild(probe);
+                    var cw = probe.getBoundingClientRect().width / 10;
+                    probe.parentNode.removeChild(probe);
+                    var pad = parseFloat(getComputedStyle(screenEl).paddingLeft) || 12;
+                    COLS = cw > 0 ? Math.floor((screenEl.clientWidth - pad * 2) / cw) : 80;
+                    COLS = Math.max(28, COLS);
+                    NARROW = COLS < 68;
+                    LABEL_W = NARROW ? Math.max(10, Math.floor(COLS * 0.42)) : 26;
+                    BAR_W = Math.max(6, Math.min(26, COLS - LABEL_W - (NARROW ? 12 : 22)));
+                }
+                measure();
+                window.addEventListener("resize", measure);
+
+                /* trims a string to fit the remaining columns */
+                function fit(str, max) {
+                    str = String(str);
+                    return str.length <= max ? str : str.slice(0, Math.max(1, max - 1)) + "…";
+                }
+
+                function newLine(cls) {
+                    var el = document.createElement("div");
+                    el.className = "line " + (cls || "");
+                    term.appendChild(el);
+                    toBottom();
+                    return el;
+                }
+
+                function put(text, cls) {
+                    var el = newLine(cls);
+                    el.textContent = text;
+                    toBottom();
+                    return el;
+                }
+
+                function gap() {
+                    newLine("spacer");
+                }
+
+                /* types text char-by-char into an element */
+                async function typeInto(el, text, minCps, maxCps) {
+                    minCps = minCps || 22;
+                    maxCps = maxCps || 46;
+                    for (var i = 0; i < text.length; i++) {
+                        el.textContent += text[i];
+                        await sleep(rnd(1000 / maxCps, 1000 / minCps));
+                        if (Math.random() < 0.02) await sleep(rnd(90, 300));
+                        if (i % 8 === 0) toBottom();
+                    }
+                    toBottom();
+                }
+
+                /* a shell prompt whose command types out live */
+                async function cmd(text) {
+                    var el = newLine("");
+                    var p = document.createElement("span");
+                    p.className = "prompt";
+                    p.textContent = "root@" + HOSTNAME + ":~# ";
+                    var c = document.createElement("span");
+                    c.className = "cmd cursor";
+                    el.appendChild(p);
+                    el.appendChild(c);
+                    toBottom();
+                    await typeInto(c, text);
+                    c.classList.remove("cursor");
+                    await sleep(rnd(180, 420));
+                    return el;
+                }
+
+                /* dumps output lines instantly, with small gaps between them */
+                async function out(lines, cls, lo, hi) {
+                    for (var i = 0; i < lines.length; i++) {
+                        put(lines[i], cls);
+                        await sleep(rnd(lo || 45, hi || 130));
+                    }
+                }
+
+                function field(label, value, cls) {
+                    var el = newLine("");
+                    var k = document.createElement("span");
+                    k.className = "field-k";
+                    var lw = Math.min(30, Math.max(9, COLS - 26));
+                    k.textContent = "  " + fit(label + " ", lw).padEnd(lw, ".") + " ";
+                    var v = document.createElement("span");
+                    v.className = "field-v " + (cls || "");
+                    v.textContent = fit(value, Math.max(8, COLS - lw - 3));
+                    el.appendChild(k);
+                    el.appendChild(v);
+                    toBottom();
+                    return el;
+                }
+
+                async function bar(label, ms, tail) {
+                    var el = newLine("dimline");
+                    var dur = Math.max(1, ms * SPEED);
+                    var start = Date.now();
+                    var stallAt = Math.random() < 0.55 ? rnd(0.55, 0.9) : 2;
+                    var stalled = false;
+                    var mbps = rnd(2.2, 16.4);
+                    for (;;) {
+                        /* clamp t, not the eased value - smoothstep goes negative past 1 */
+                        var t = Math.min(1, (Date.now() - start) / dur);
+                        var p = t * t * (3 - 2 * t);
+                        if (!stalled && p >= stallAt) {
+                            stalled = true;
+                            el.textContent = render(p);
+                            var s0 = Date.now();
+                            await sleep(rnd(500, 1100));
+                            start += Date.now() - s0; /* don't count the stall against progress */
+                            continue;
+                        }
+                        el.textContent = render(p);
+                        if (t >= 1) break;
+                        await sleep(55);
+                    }
+                    el.className = "line ok";
+                    el.textContent = render(1) + (NARROW ? "" : "  done");
+                    await sleep(rnd(120, 300));
+
+                    function render(p) {
+                        var n = Math.round(p * BAR_W);
+                        var pct = String(Math.round(p * 100)).padStart(3, " ");
+                        var speed = tail && !NARROW ? "  " + Math.max(0.3, mbps + rnd(-1.1, 1.1)).toFixed(1) + " MB/s" : "";
+                        return "  " + fit(label, LABEL_W).padEnd(LABEL_W, " ") + " [" + "█".repeat(n) + "░".repeat(BAR_W - n) + "] " + pct + "%" + speed;
+                    }
+                }
+
+                async function hexdump(n) {
+                    /* 16 bytes/row needs ~88 cols; fall back to 8 or 4 when cramped */
+                    var per = COLS >= 88 ? 16 : COLS >= 52 ? 8 : 4;
+                    var addr = COLS >= 52 ? 12 : 6;
+                    for (var i = 0; i < n; i++) {
+                        var bytes = [];
+                        for (var b = 0; b < per; b++) bytes.push(hex(2));
+                        var ascii = bytes
+                            .map(function (h) {
+                                var v = parseInt(h, 16);
+                                return v >= 32 && v < 127 ? String.fromCharCode(v) : ".";
+                            })
+                            .join("");
+                        var mid = per >= 16 ? bytes.slice(0, 8).join(" ") + "  " + bytes.slice(8).join(" ") : bytes.join(" ");
+                        put("  0x" + hex(addr) + "  " + mid + "  |" + ascii + "|", "hex");
+                        await sleep(rnd(18, 55));
+                    }
+                }
+
+                function rule() {
+                    put("  " + "─".repeat(Math.max(12, Math.min(52, COLS - 4))), "rule");
+                }
+
+                /* ============================================================
+                 * fake identity
+                 * ========================================================== */
+                function randIP() {
+                    return [Math.floor(rnd(12, 223)), Math.floor(rnd(0, 255)), Math.floor(rnd(0, 255)), Math.floor(rnd(1, 254))].join(".");
+                }
+                function randMAC() {
+                    var p = [];
+                    for (var i = 0; i < 6; i++) p.push(hex(2));
+                    return p.join(":").toUpperCase();
+                }
+
+                var HOSTNAME = "node" + Math.floor(rnd(100, 999));
+                var ATTACKER_IP = randIP();
+                var TARGET_IP = randIP();
+                var TARGET_MAC = randMAC();
+
+                /* ============================================================
+                 * intel: everything below is read locally and printed on screen.
+                 * nothing is stored, and nothing is ever sent anywhere.
+                 * ========================================================== */
+                function detectOS() {
+                    var ua = navigator.userAgent;
+                    var p = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+                    if (/iPhone|iPad|iPod/.test(ua)) return "Apple iOS / iPadOS";
+                    if (/Android/.test(ua)) return "Android " + ((ua.match(/Android (\d+(\.\d+)?)/) || [])[1] || "");
+                    if (/Mac/.test(p) || /Macintosh/.test(ua)) return "Apple macOS (darwin)";
+                    if (/Win/.test(p) || /Windows/.test(ua)) return "Microsoft Windows NT";
+                    if (/Linux/.test(p) || /Linux/.test(ua)) return "GNU/Linux";
+                    return p || "UNKNOWN";
+                }
+
+                function detectBrowser() {
+                    var ua = navigator.userAgent;
+                    var m;
+                    if ((m = ua.match(/Edg\/(\d+)/))) return "Microsoft Edge " + m[1];
+                    if ((m = ua.match(/OPR\/(\d+)/))) return "Opera " + m[1];
+                    if ((m = ua.match(/Firefox\/(\d+)/))) return "Mozilla Firefox " + m[1];
+                    if (/Chrome/.test(ua) && (m = ua.match(/Chrome\/(\d+)/))) return "Google Chrome " + m[1];
+                    if (/Safari/.test(ua) && (m = ua.match(/Version\/(\d+)/))) return "Apple Safari " + m[1];
+                    return "UNKNOWN AGENT";
+                }
+
+                function getGPU() {
+                    try {
+                        var c = document.createElement("canvas");
+                        var gl = c.getContext("webgl") || c.getContext("experimental-webgl");
+                        if (!gl) return null;
+                        var ext = gl.getExtension("WEBGL_debug_renderer_info");
+                        var r = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+                        return r ? String(r).replace(/\s+/g, " ").trim() : null;
+                    } catch (e) {
+                        return null;
+                    }
+                }
+
+                function utcOffset() {
+                    var o = -new Date().getTimezoneOffset();
+                    var s = o < 0 ? "-" : "+";
+                    o = Math.abs(o);
+                    return "UTC" + s + String(Math.floor(o / 60)).padStart(2, "0") + ":" + String(o % 60).padStart(2, "0");
+                }
+
+                async function battery() {
+                    try {
+                        if (!navigator.getBattery) return null;
+                        var b = await navigator.getBattery();
+                        return Math.round(b.level * 100) + "%  " + (b.charging ? "[CHARGING]" : "[ON BATTERY]");
+                    } catch (e) {
+                        return null;
+                    }
+                }
+
+                async function storage() {
+                    try {
+                        if (!navigator.storage || !navigator.storage.estimate) return null;
+                        var e = await navigator.storage.estimate();
+                        if (!e || !e.quota) return null;
+                        return (e.quota / 1073741824).toFixed(1) + " GB addressable";
+                    } catch (e) {
+                        return null;
+                    }
+                }
+
+                /* ============================================================
+                 * canvas: matrix rain -> confetti
+                 * ========================================================== */
+                var cvs = document.getElementById("rain");
+                var ctx = cvs.getContext("2d");
+                var mode = "off";
+                var rainColor = "#35ff6d";
+                var FS = 15;
+                var cols = 0,
+                    drops = [],
+                    confetti = [];
+                var glyphs = "アカサタナハマヤラワ01<>[]{}/*+-#$%&@!?";
+
+                function resize() {
+                    cvs.width = window.innerWidth;
+                    cvs.height = window.innerHeight;
+                    cols = Math.max(1, Math.floor(cvs.width / FS));
+                    drops = [];
+                    for (var i = 0; i < cols; i++) drops.push(Math.random() * -60);
+                }
+                window.addEventListener("resize", resize);
+                resize();
+
+                function frame() {
+                    requestAnimationFrame(frame);
+                    if (mode === "off") return;
+
+                    if (mode === "rain") {
+                        ctx.fillStyle = "rgba(0,0,0,0.075)";
+                        ctx.fillRect(0, 0, cvs.width, cvs.height);
+                        ctx.font = FS + "px monospace";
+                        ctx.fillStyle = rainColor;
+                        for (var i = 0; i < cols; i++) {
+                            ctx.fillText(glyphs[Math.floor(Math.random() * glyphs.length)], i * FS, drops[i] * FS);
+                            if (drops[i] * FS > cvs.height && Math.random() > 0.975) drops[i] = 0;
+                            drops[i] += REDUCED ? 0.25 : 0.75;
+                        }
+                        return;
+                    }
+
+                    if (mode === "confetti") {
+                        ctx.clearRect(0, 0, cvs.width, cvs.height);
+                        for (var j = 0; j < confetti.length; j++) {
+                            var p = confetti[j];
+                            p.x += p.vx;
+                            p.y += p.vy;
+                            p.vy += 0.14;
+                            p.rot += p.vr;
+                            ctx.save();
+                            ctx.translate(p.x, p.y);
+                            ctx.rotate(p.rot);
+                            ctx.fillStyle = p.c;
+                            ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                            ctx.restore();
+                            if (p.y > cvs.height + 40) {
+                                p.y = -20;
+                                p.x = Math.random() * cvs.width;
+                                p.vy = rnd(1, 3);
+                            }
+                        }
+                    }
+                }
+                frame();
+
+                function startConfetti() {
+                    cvs.style.opacity = "1";
+                    confetti = [];
+                    var colors = ["#ffd166", "#ff6bd6", "#6bdcff", "#46e08a", "#ff7676", "#c4a0ff"];
+                    var count = REDUCED ? 40 : 130;
+                    for (var i = 0; i < count; i++) {
+                        confetti.push({
+                            x: Math.random() * cvs.width,
+                            y: Math.random() * -cvs.height,
+                            vx: rnd(-1.2, 1.2),
+                            vy: rnd(1, 4),
+                            w: rnd(5, 11),
+                            h: rnd(7, 15),
+                            rot: rnd(0, 6.28),
+                            vr: rnd(-0.12, 0.12),
+                            c: pick(colors),
+                        });
+                    }
+                    mode = "confetti";
+                }
+
+                /* ============================================================
+                 * keylogger echo (displayed only - never stored or sent)
+                 * ========================================================== */
+                var loggerOn = false;
+                var buf = "";
+
+                function onKey(e) {
+                    if (e.key === "Escape") {
+                        finish(true);
+                        return;
+                    }
+                    if (!loggerOn) return;
+                    var k = e.key;
+                    if (k === " ") k = "␣";
+                    else if (k === "Enter") k = "⏎";
+                    else if (k === "Backspace") k = "⌫";
+                    else if (k.length > 1) k = "[" + k.toUpperCase() + "]";
+                    buf = (buf + k).slice(-64);
+                    keybuf.textContent = buf;
+                }
+                window.addEventListener("keydown", onKey);
+
+                /* ============================================================
+                 * effects
+                 * ========================================================== */
+                function fx(cls, on) {
+                    document.body.classList.toggle(cls, !!on && !REDUCED);
+                }
+
+                async function glitchBurst(ms) {
+                    fx("glitch", true);
+                    await sleep(ms);
+                    fx("glitch", false);
+                }
+
+                /* ============================================================
+                 * the show
+                 * ========================================================== */
+                async function act1_connect() {
+                    mode = "rain";
+                    put(fit("SecureShell 4.11.2 (build " + hex(7) + ")  —  session " + hex(4), COLS), "dimline");
+                    put(fit("node " + ATTACKER_IP + "  |  7 hops  |  AES-256-GCM", COLS), "faintline");
+                    gap();
+
+                    await cmd("./intrude --target auto --stealth 3");
+                    await sleep(400);
+                    await out(["  resolving target interface ......... eth0", "  probing subnet ..................... 1 host up"], "dimline");
+                    await bar("establishing tunnel", 2600, true);
+                    await out(["  [ok] tunnel up: " + ATTACKER_IP + " → " + TARGET_IP, "  [ok] handshake accepted, key exchange complete"], "ok");
+                    gap();
+
+                    await cmd("nmap -sS -T4 " + TARGET_IP);
+                    await sleep(500);
+                    await out(
+                        [
+                            "  PORT      STATE    SERVICE",
+                            "  22/tcp    open     ssh",
+                            "  80/tcp    open     http",
+                            "  443/tcp   open     https",
+                            "  445/tcp   open     microsoft-ds",
+                            "  3389/tcp  open     ms-wbt-server",
+                            "  5900/tcp  open     vnc",
+                        ],
+                        "dimline",
+                        60,
+                        150,
+                    );
+                    put(fit("  6 open ports — host is exposed", COLS), "warn");
+                    gap();
+
+                    await cmd("exploit --module remote_shell --escalate");
+                    await bar("bypassing firewall", 2400, false);
+                    await bar("privilege escalation", 2100, false);
+                    put("  [ok] ROOT ACCESS GRANTED", "ok");
+                    await sleep(600);
+                    await hexdump(4);
+                    gap();
+                }
+
+                async function act2_recon() {
+                    await cmd("./fingerprint --deep --dump-hardware");
+                    await sleep(500);
+                    put("  scanning target machine, this may take a moment...", "dimline");
+                    await bar("reading device profile", 2600, false);
+                    gap();
+                    rule();
+                    put("  TARGET PROFILE" + (VICTIM ? "  —  " + VICTIM.toUpperCase() : ""), "warn");
+                    rule();
+                    await sleep(500);
+
+                    var d = new Date();
+                    var tz = "UNKNOWN";
+                    try {
+                        tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UNKNOWN";
+                    } catch (e) {}
+
+                    var rows = [
+                        ["OPERATING SYSTEM", detectOS()],
+                        ["BROWSER", detectBrowser()],
+                        ["HOSTNAME", (VICTIM ? VICTIM.split(" ")[0] : "user") + "-" + detectOS().split(" ")[1] + "-" + hex(3)],
+                        ["LOCAL IP", TARGET_IP],
+                        ["MAC ADDRESS", TARGET_MAC],
+                        ["DISPLAY", screen.width + " x " + screen.height + " @ " + (window.devicePixelRatio || 1) + "x"],
+                        ["VIEWPORT", window.innerWidth + " x " + window.innerHeight],
+                        ["COLOR DEPTH", (screen.colorDepth || 24) + "-bit"],
+                        ["CPU THREADS", (navigator.hardwareConcurrency || "?") + " logical cores"],
+                    ];
+
+                    if (navigator.deviceMemory) rows.push(["SYSTEM MEMORY", navigator.deviceMemory + " GB"]);
+
+                    var gpu = getGPU();
+                    if (gpu) rows.push(["GRAPHICS ADAPTER", gpu]);
+
+                    var st = await storage();
+                    if (st) rows.push(["DISK", st]);
+
+                    var bt = await battery();
+                    if (bt) rows.push(["POWER", bt]);
+
+                    rows.push(["TIMEZONE", tz + "  (" + utcOffset() + ")"]);
+                    rows.push(["LOCAL TIME", d.toLocaleTimeString() + "  " + d.toLocaleDateString()]);
+                    rows.push(["LANGUAGE", (navigator.languages || [navigator.language]).slice(0, 3).join(", ")]);
+                    rows.push(["INPUT", (navigator.maxTouchPoints > 0 ? "touchscreen + " : "") + "keyboard, pointer"]);
+
+                    if (navigator.connection && navigator.connection.effectiveType) {
+                        rows.push(["NETWORK", navigator.connection.effectiveType.toUpperCase() + (navigator.connection.downlink ? "  ~" + navigator.connection.downlink + " Mb/s" : "")]);
+                    }
+
+                    rows.push(["COOKIES", navigator.cookieEnabled ? "ENABLED — readable" : "disabled"]);
+                    rows.push(["ARRIVED FROM", document.referrer ? document.referrer.slice(0, 44) : "direct / bookmark"]);
+
+                    for (var i = 0; i < rows.length; i++) {
+                        field(rows[i][0], rows[i][1]);
+                        await sleep(rnd(190, 460));
+                    }
+
+                    rule();
+                    await sleep(700);
+                    put("  [!] target clock is active — someone is at this machine right now", "warn");
+                    await sleep(1100);
+                    if (VICTIM) {
+                        put("  [!] identity match: " + VICTIM.toUpperCase(), "bad");
+                        await sleep(900);
+                    }
+                    gap();
+                }
+
+                async function act3_exfil() {
+                    await cmd("./harvest --recursive --upload");
+                    await sleep(400);
+                    var u = VICTIM ? VICTIM.split(" ")[0].toLowerCase() : "user";
+                    var files = [
+                        ["/Users/" + u + "/Documents/tax_return_2025.pdf", "2.4 MB"],
+                        ["/Users/" + u + "/Documents/passport_scan.jpg", "6.1 MB"],
+                        ["/Users/" + u + "/.ssh/id_rsa", "3.2 KB"],
+                        ["/Users/" + u + "/.aws/credentials", "1.1 KB"],
+                        ["/Users/" + u + "/Library/Keychains/login.keychain", "48.7 MB"],
+                        ["/Users/" + u + "/Pictures/Camera Roll/*", "1,284 files"],
+                        ["/Users/" + u + "/Downloads/bank_statement_aug.pdf", "412 KB"],
+                        ["browser/saved_passwords.sqlite", "9.8 MB"],
+                        ["browser/cookies.sqlite", "21.3 MB"],
+                        ["browser/history.sqlite", "64.9 MB"],
+                    ];
+                    for (var i = 0; i < files.length; i++) {
+                        var el = newLine("dimline");
+                        el.textContent = "  UPLOAD  " + fit(files[i][0], Math.max(12, COLS - 10));
+                        await sleep(rnd(120, 300));
+                        el.className = "line ok";
+                        var pw = Math.max(12, COLS - 8 - 12);
+                        el.textContent = "  [↑]  " + fit(files[i][0], pw).padEnd(pw, " ") + files[i][1];
+                        await sleep(rnd(90, 260));
+                    }
+                    gap();
+                    await bar("exfiltrating archive", 3200, true);
+                    gap();
+
+                    await cmd("./devices --enable cam0 --silent");
+                    await sleep(700);
+                    put("  locating camera device ...", "dimline");
+                    await sleep(1200);
+                    put("  [ok] cam0 found — indicator LED suppressed", "warn");
+                    await sleep(900);
+                    put("  capturing ...", "dimline");
+                    await sleep(3000);
+                    put("  [ok] 3 frames captured, 1 face detected", "bad");
+                    await sleep(1200);
+                    gap();
+
+                    await cmd("./klog --attach --stream");
+                    await sleep(600);
+                    keystrip.style.display = "block";
+                    loggerOn = true;
+                    keybuf.textContent = "waiting for input…";
+                    put("  [ok] keyboard hook installed — keystrokes are being recorded", "bad");
+                    await sleep(1400);
+                    put("  type something. we can see it.", "warn");
+                    await sleep(4200);
+                    gap();
+                }
+
+                async function act4_meltdown() {
+                    await cmd("./payload --deploy --encrypt-all --no-confirm");
+                    await sleep(700);
+                    await out(["  loading module: cryptolock.so", "  enumerating volumes ...", "  1 volume, 482,193 files"], "dimline");
+                    await bar("encrypting filesystem", 2800, true);
+                    fx("shake", true);
+                    await glitchBurst(500);
+                    await out(["  [!] disabling recovery partition", "  [!] purging local snapshots", "  [!] revoking user credentials"], "bad", 260, 420);
+                    await sleep(500);
+
+                    document.body.classList.add("meltdown");
+                    rainColor = "#ff2b2b";
+                    fx("glitch", true);
+                    await sleep(900);
+
+                    screenEl.style.display = "none";
+                    alertEl.style.display = "flex";
+                    fx("strobe", true);
+                    fx("glitch", false);
+
+                    var msgs = ["ALL LOCAL FILES HAVE BEEN ENCRYPTED", "DO NOT SHUT DOWN YOUR COMPUTER", "YOUR DATA HAS BEEN UPLOADED", "WE ARE STILL WATCHING"];
+                    for (var i = 0; i < msgs.length; i++) {
+                        alertMsg.textContent = msgs[i];
+                        await sleep(1500);
+                    }
+                    alertTitle.textContent = "CONNECTION LOST";
+                    alertMsg.textContent = "";
+                    await sleep(1200);
+                }
+
+                /* the delayed reveal: everything cuts out and just... sits there */
+                async function act5_hold() {
+                    fx("strobe", false);
+                    fx("shake", false);
+                    fx("glitch", false);
+                    document.body.classList.remove("meltdown");
+                    mode = "off";
+                    ctx.clearRect(0, 0, cvs.width, cvs.height);
+                    alertEl.style.display = "none";
+                    keystrip.style.display = "none";
+                    loggerOn = false;
+                    document.getElementById("crt").style.display = "none";
+                    document.getElementById("flicker").style.display = "none";
+
+                    holdEl.style.display = "flex";
+                    holdText.className = "cursor";
+                    holdText.textContent = "";
+
+                    var t = HOLD_MS;
+                    await sleep(t * 0.42);
+                    await typeInto(holdText, "…", 3, 5);
+                    await sleep(t * 0.32);
+                    holdText.textContent = "";
+                    await typeInto(holdText, "still there?", 5, 9);
+                    await sleep(t * 0.26);
+                }
+
+                function showReveal() {
+                    holdEl.style.display = "none";
+                    alertEl.style.display = "none";
+                    screenEl.style.display = "none";
+                    keystrip.style.display = "none";
+                    loggerOn = false;
+                    document.getElementById("crt").style.display = "none";
+                    document.getElementById("vignette").style.display = "none";
+                    document.getElementById("flicker").style.display = "none";
+                    document.body.classList.remove("meltdown");
+                    revealEl.style.display = "flex";
+                    startConfetti();
+                    if (document.fullscreenElement && document.exitFullscreen) {
+                        document.exitFullscreen().catch(function () {});
+                    }
+                }
+
+                function finish(early) {
+                    abortAll();
+                    showReveal();
+                }
+
+                async function run() {
+                    try {
+                        await act1_connect();
+                        await act2_recon();
+                        await act3_exfil();
+                        await act4_meltdown();
+                        await act5_hold();
+                        showReveal();
+                    } catch (e) {
+                        /* aborted via esc - reveal already shown */
+                    }
+                }
+
+                /* ============================================================
+                 * boot
+                 * ========================================================== */
+                function start() {
+                    gate.removeEventListener("click", start);
+                    gate.style.display = "none";
+                    var el = document.documentElement;
+                    var rq = el.requestFullscreen || el.webkitRequestFullscreen;
+                    if (rq) {
+                        try {
+                            rq.call(el).catch(function () {});
+                        } catch (e) {}
+                    }
+                    run();
+                }
+                gate.addEventListener("click", start);
+
+                document.getElementById("again").addEventListener("click", function () {
+                    location.reload();
+                });
+                document.getElementById("src").addEventListener("click", function () {
+                    window.open("view-source:" + location.href, "_blank");
+                });
+            })();
+        </script>
+    </body>
 </html>
